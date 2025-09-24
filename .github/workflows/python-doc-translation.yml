@@ -1,0 +1,70 @@
+name: Python Documentation Translation Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      language_code:
+        description: 'Language code'
+        required: true
+        type: string
+
+jobs:
+  process-translation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gettext
+        python -m pip install --upgrade pip
+        pip install sphinx potodo
+
+    - name: Determine /3/ version and clone CPython
+      run: |
+        PYTHON_VERSION=$(curl -s https://docs.python.org/3/ | grep -oP 'Python \K\d+\.\d+' | head -1)
+        git clone --branch "$PYTHON_VERSION" --single-branch --depth 1 https://github.com/python/cpython.git
+
+    - name: Clone translation
+      run: |
+        git clone https://github.com/python/python-docs-${{ inputs.language_code }}.git translation-repo
+
+    - name: Generate POT files
+      run: |
+        cd cpython/Doc
+        make gettext
+        mkdir -p ../../pot-files
+        cp -r build/gettext/*.pot ../../pot-files/
+
+    - name: msgmerge PO files
+      run: |
+        cd translation-repo
+        find . -name "*.po" -type f | while read po_file; do
+          rel_path=${po_file#./}
+          pot_file="../pot-files/${rel_path%.po}.pot"
+
+          if [ -f "$pot_file" ]; then
+            echo "Merging $po_file with $pot_file"
+            msgmerge --update "$po_file" "$pot_file"
+          fi
+        done
+
+    - name: Run potodo
+      run: |
+        cd translation-repo
+        potodo | tee ../potodo-results.txt
+
+    - name: Upload potodo results as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: potodo-results-${{ inputs.language_code }}
+        path: potodo-results.txt
+        retention-days: 30
