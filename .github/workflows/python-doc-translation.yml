@@ -1,6 +1,7 @@
 name: Python Documentation Translation Workflow
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       language_code:
