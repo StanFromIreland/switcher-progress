@@ -1,4 +1,4 @@
-name: Python Documentation Translation Workflow
+name: Switcher progress
 
 on:
   workflow_dispatch:
