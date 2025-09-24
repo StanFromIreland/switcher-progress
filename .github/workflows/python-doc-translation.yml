@@ -10,7 +10,7 @@ on:
         type: string
 
 jobs:
-  process-translation:
+  process-tra    nslation:
     runs-on: ubuntu-latest
 
     steps:
