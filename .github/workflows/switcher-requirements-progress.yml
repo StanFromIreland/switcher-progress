@@ -1,4 +1,4 @@
-name: Switcher progress
+name: Switcher progress status for ${{ inputs.language_code }}
 
 on:
   workflow_dispatch:
