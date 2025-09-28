@@ -81,6 +81,7 @@ jobs:
         fi
 
     - name: Upload potodo results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: potodo-results-${{ inputs.language_code }}
