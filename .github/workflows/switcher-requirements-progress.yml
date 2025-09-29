@@ -11,6 +11,9 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language_code: [ "${{ inputs.language_code }}" ]
 
     steps:
     - name: Checkout current repository
@@ -35,7 +38,7 @@ jobs:
 
     - name: Clone translation
       run: |
-        git clone https://github.com/python/python-docs-${{ inputs.language_code }}.git translation-repo
+        git clone https://github.com/python/python-docs-${{ matrix.language_code }}.git translation-repo
 
     - name: Generate POT files
       run: |
